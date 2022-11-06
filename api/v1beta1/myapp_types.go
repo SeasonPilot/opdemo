@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,6 +30,11 @@ type MyAppSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	Size      *int32                      `json:"size"` // fixme: int32 是指针类型
+	Image     string                      `json:"image"`
+	Ports     []corev1.ServicePort        `json:"ports,omitempty"`
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+	Envs      []corev1.EnvVar             `json:"envs,omitempty"` // fixme: env 为复数
 }
 
 // MyAppStatus defines the observed state of MyApp
@@ -35,6 +42,7 @@ type MyAppStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	appsv1.DeploymentStatus `json:",inline"`
 }
 
 // +kubebuilder:object:root=true
