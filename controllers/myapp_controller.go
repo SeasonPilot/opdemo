@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -95,7 +96,9 @@ func (r *MyAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		}
 
 		myApp.Annotations = map[string]string{annoKey: string(data)} // 不管 annotation map 是否为 nil 都赋值
-		err = r.Update(ctx, &myApp)
+		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			return r.Update(ctx, &myApp)
+		})
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -120,7 +123,9 @@ func (r *MyAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 		// 更新关联资源
 		deploy.Spec = newDeploy(myApp).Spec
-		err = r.Update(ctx, deploy) // fixme: 不是创建新的资源，应该是更新旧的对象
+		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			return r.Update(ctx, deploy)
+		})
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -135,7 +140,9 @@ func (r *MyAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		// fixme: 需要指定 ClusterIP 为之前的，不然更新会报错。
 		//   试了下，更新的时候好像也没有报错.  暂不修改
 		oldSvc.Spec = newService(myApp).Spec
-		err = r.Update(ctx, oldSvc)
+		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			return r.Update(ctx, oldSvc)
+		})
 		if err != nil {
 			return ctrl.Result{}, err
 		}
