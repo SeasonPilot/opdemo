@@ -9,4 +9,9 @@ metadata:
     app.kubernetes.io/created-by: opdemo
   name: myapp-sample
 spec:
-  # TODO(user): Add fields here
+  size: 3
+  image: nginx:latest
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30006
