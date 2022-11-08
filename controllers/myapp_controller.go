@@ -35,6 +35,10 @@ type MyAppReconciler struct {
 	Scheme *runtime.Scheme
 }
 
+// fixme: 注释中，resources的值应该是复数deployments
+
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=app.season.io,resources=myapps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=app.season.io,resources=myapps/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=app.season.io,resources=myapps/finalizers,verbs=update
